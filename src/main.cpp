@@ -126,26 +126,50 @@ static void _cb(
         }
     cmd[ cnt ] = '\0';
 
-    Serial.printf( "cmd: %s\r\n", cmd );
+    // Serial.printf( "cmd: %s\r\n", cmd );
 
-    if ( strcmp( cmd, "reboot" ) == 0 )
+    if ( strcmp( aTopic, "track/light/MGMT" ) == 0 )
         {
-        _rpt( __LINE__, "reboot - mqtt message" );
-        Serial.println( "reboot(commanded)" );
-        delay( 1000 );
-        ESP.restart();
+        if ( strcmp( cmd, "reboot" ) == 0 )
+            {
+            _rpt( __LINE__, "reboot - mqtt message" );
+            Serial.println( "reboot(commanded)" );
+            delay( 1000 );
+            ESP.restart();
+            }
+        }
+    else
+        {
+        String defTopic;
+
+        defTopic = "track/light/";
+        defTopic += _mac;
+
+        if ( defTopic == aTopic )
+            {
+            if ( strcmp( cmd, "ON" ) == 0 )
+                {
+                digitalWrite( LED_BUILTIN, HIGH );
+                }
+            else if ( strcmp( cmd, "OFF" ) == 0 )
+                {
+                digitalWrite( LED_BUILTIN, LOW );
+                }
+            }
         }
     }
 
 #define CONNECT_TIME_LIMIT_SEC_l    20
-#define MGMT_TOPIC "/MGMT/LC"
+#define MGMT_TOPIC "track/light/#"
 
 static void _subscribe(
         )
     {
-    Serial.println( "_subscribe(entered) - topic: " MGMT_TOPIC );
+    String defTopic;
 
     _mqtt.subscribe( MGMT_TOPIC );
+
+    Serial.printf( "Subscribe: %s\r\n", MGMT_TOPIC );
     }
 
 static void _connect(
@@ -341,7 +365,7 @@ static void _checkOTA(
         
         strcpy( _prog, "firmware/main/" );
         strcat( _prog, TOSTR( __BOARD ) );
-        strcat( _prog, "/MON2/firmware" );
+        strcat( _prog, "/LC/firmware" );
 
         Serial.printf( "_checkOTA - (_prog: %s)\r\n", _prog );
         }
@@ -491,13 +515,5 @@ void loop(
         }
 
     _mqtt.loop();
-
-    if ( now > _blinkTime )
-        {
-        _blinkTime = now + BLINKINV;
-
-        digitalWrite( LED_BUILTIN, (_blinkState) ? HIGH : LOW );
-        _blinkState = !_blinkState;
-        }
     }
 

@@ -18,7 +18,7 @@ push: .build
 	    echo "scp .pio/build/$$ENV/firmware.bin lamb@pharmdata.ddns.net:/var/www/html/firmware/$(BRANCH)/$$ENV/$(PROG)/firmware.bin" ; \
 	    scp .pio/build/$$ENV/firmware.bin lamb@pharmdata.ddns.net:/var/www/html/firmware/$(BRANCH)/$$ENV/$(PROG)/firmware.bin ; \
 	    done
-	mosquitto_pub -h pharmdata.ddns.net -p 1883 -t "/MGMT/$(PROG)" -m "reboot"
+	mosquitto_pub -h mqtt.lam -p 1883 -t "track/light/MGMT" -m "reboot"
 
 monitor:
 	pio device monitor
